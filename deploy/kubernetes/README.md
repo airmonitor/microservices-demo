@@ -30,3 +30,30 @@ ssh -i $KEY -L 3000:$NODE_IN_CLUSTER:31300 -L 9090:$NODE_IN_CLUSTER:31090 ubuntu
 Where all the pertinent information should be entered. Grafana and Prometheus will be available on `http://localhost:3000` or `:9090`.
 
 If on Minikube, you can connect via the VM IP address and the NodePort.
+
+
+## Kubernetes 1.17.3
+    cd microservices-demo/deploy/kubernetes 
+    kubectl create namespace sock-shop
+    kubectl convert -f . | kubectl create -f -
+    watch kubectl get pods -n sock-shop
+### wait for all in status Running
+    kubectl describe svc front-end -n sock-shop
+
+## [Minikube](https://kubernetes.io/docs/setup/learning-environment/minikube/)
+
+     minikube start --kubernetes-version v1.15.0 --vm-driver=virtualbox
+
+#### Adding cluster to gitlab
+http://192.168.1.40/help/user/project/clusters/index.md#adding-an-existing-kubernetes-cluster
+
+1. Proxy
+    kubectl proxy --accept-hosts='.*' --address='192.168.1.86'
+    
+2. Get certificate
+    kubectl get secret
+    
+    kubectl get secret <secret name> -o jsonpath="{['data']['ca\.crt']}" | base64 --decode
+    
+3. Get token
+    kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep gitlab-admin | awk '{print $1}')
