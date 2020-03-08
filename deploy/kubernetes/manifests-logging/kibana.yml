@@ -14,7 +14,7 @@ spec:
         name: kibana
     spec:
       containers:
-       - image: kibana
+       - image: kibana:5.6.16
          name: kibana
          ports:
           - name: kibana
