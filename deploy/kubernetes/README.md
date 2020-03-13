@@ -42,18 +42,43 @@ If on Minikube, you can connect via the VM IP address and the NodePort.
 
 ## [Minikube](https://kubernetes.io/docs/setup/learning-environment/minikube/)
 
-     minikube start --kubernetes-version v1.15.0 --vm-driver=virtualbox
+     minikube start --kubernetes-version v1.15.10 --vm-driver=virtualbox
 
 #### Adding cluster to gitlab
-http://192.168.1.40/help/user/project/clusters/index.md#adding-an-existing-kubernetes-cluster
+http://gitlab.com/help/user/project/clusters/index.md#adding-an-existing-kubernetes-cluster
 
 1. Proxy
     kubectl proxy --accept-hosts='.*' --address='192.168.1.86'
+
+### Gitlab Requirement
+2. Create ClusterRole
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gitlab-admin
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: gitlab-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: gitlab-admin
+  namespace: kube-system
+
     
-2. Get certificate
+3. Get certificate
     kubectl get secret
     
     kubectl get secret <secret name> -o jsonpath="{['data']['ca\.crt']}" | base64 --decode
     
-3. Get token
+4. Get token
     kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep gitlab-admin | awk '{print $1}')
+    
+5. Create private docker registry credentials inside kubernetes cluster
+    kubectl create secret docker-registry regcred --docker-server=registry.gitlab.com --docker-username=tomasz.szuster@billennium.com --docker-password=-V3i9V1DuT-8dz6RXxmr --docker-email=tomasz.szuster@billennium.com
